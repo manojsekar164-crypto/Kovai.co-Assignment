@@ -1,0 +1,499 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ===================================================
+     HERO SECTION
+     =================================================== -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <p class="hero-eyebrow"><i class="bi bi-lightning-charge-fill me-1"></i> Your productivity hub</p>
+        <h1 class="hero-title">Task Dashboard</h1>
+        <p class="hero-subtitle">
+          Create, track, and manage all your tasks in one place.
+          Stay on top of every project — from planning to completion.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+        <a href="#addTaskCard" class="btn btn-hero">
+          <i class="bi bi-plus-lg me-2"></i>New Task
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===================================================
+     STATISTICS CARDS
+     =================================================== -->
+<section class="stats-section">
+  <div class="container">
+    <div class="row g-4">
+
+      <!-- Total -->
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-total">
+          <div class="stat-icon"><i class="bi bi-stack"></i></div>
+          <div class="stat-body">
+            <div class="stat-number">{{ stats.total }}</div>
+            <div class="stat-label">Total Tasks</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Planned -->
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-planned">
+          <div class="stat-icon"><i class="bi bi-calendar3"></i></div>
+          <div class="stat-body">
+            <div class="stat-number">{{ stats.planned }}</div>
+            <div class="stat-label">Planned</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- In Progress -->
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-inprogress">
+          <div class="stat-icon"><i class="bi bi-arrow-repeat"></i></div>
+          <div class="stat-body">
+            <div class="stat-number">{{ stats.in_progress }}</div>
+            <div class="stat-label">In Progress</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Complete -->
+      <div class="col-6 col-lg-3">
+        <div class="stat-card stat-complete">
+          <div class="stat-icon"><i class="bi bi-check2-all"></i></div>
+          <div class="stat-body">
+            <div class="stat-number">{{ stats.complete }}</div>
+            <div class="stat-label">Complete</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ===================================================
+     MAIN CONTENT: ADD TASK + TASK LIST
+     =================================================== -->
+<section class="content-section">
+  <div class="container">
+    <div class="row g-5">
+
+      <!-- ---- ADD TASK FORM ---- -->
+      <div class="col-lg-4">
+        <div class="form-card" id="addTaskCard">
+          <div class="form-card-header">
+            <span class="form-card-icon"><i class="bi bi-plus-circle-fill"></i></span>
+            <h2 class="form-card-title">Create New Task</h2>
+          </div>
+
+          <form
+            id="addTaskForm"
+            action="{{ url_for('add_task') }}"
+            method="POST"
+            novalidate
+          >
+            <!-- Title -->
+            <div class="mb-4">
+              <label for="taskTitle" class="form-label fw-semibold">
+                Task Title <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-control custom-input"
+                id="taskTitle"
+                name="title"
+                placeholder="e.g. Design landing page"
+                maxlength="200"
+                value="{{ form_data.get('title', '') | e }}"
+                required
+                autocomplete="off"
+              />
+              <div class="invalid-feedback">Please enter a task title.</div>
+              <div class="char-counter" id="titleCounter">0 / 200</div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+              <label for="taskDescription" class="form-label fw-semibold">
+                Description <span class="text-muted fw-normal">(optional)</span>
+              </label>
+              <textarea
+                class="form-control custom-input"
+                id="taskDescription"
+                name="description"
+                rows="4"
+                placeholder="Add more details about this task…"
+                maxlength="2000"
+              >{{ form_data.get('description', '') | e }}</textarea>
+              <div class="char-counter" id="descCounter">0 / 2000</div>
+            </div>
+
+            <!-- Status -->
+            <div class="mb-4">
+              <label for="taskStatus" class="form-label fw-semibold">Initial Status</label>
+              <select class="form-select custom-input" id="taskStatus" name="status">
+                <option value="Planned"     {{ 'selected' if form_data.get('status','Planned') == 'Planned' }}>📋 Planned</option>
+                <option value="In Progress" {{ 'selected' if form_data.get('status') == 'In Progress' }}>🔄 In Progress</option>
+                <option value="Complete"    {{ 'selected' if form_data.get('status') == 'Complete' }}>✅ Complete</option>
+              </select>
+            </div>
+
+            <!-- Submit -->
+            <button
+              type="submit"
+              id="createTaskBtn"
+              class="btn btn-create w-100"
+            >
+              <i class="bi bi-plus-lg me-2"></i>Create Task
+            </button>
+          </form>
+        </div>
+      </div>
+      <!-- ---- END ADD TASK FORM ---- -->
+
+
+      <!-- ---- TASK LIST ---- -->
+      <div class="col-lg-8">
+
+        <!-- List header + filter -->
+        <div class="list-header d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+          <h2 class="list-title mb-0">
+            <i class="bi bi-list-task me-2"></i>All Tasks
+            <span class="task-count-badge">{{ tasks | length }}</span>
+          </h2>
+
+          <!-- Status Filter -->
+          <div class="filter-group">
+            <a href="{{ url_for('dashboard') }}"
+               class="btn btn-filter {{ 'active' if not current_filter else '' }}">
+              All
+            </a>
+            <a href="{{ url_for('dashboard', status='Planned') }}"
+               class="btn btn-filter {{ 'active' if current_filter == 'Planned' else '' }}">
+              Planned
+            </a>
+            <a href="{{ url_for('dashboard', status='In Progress') }}"
+               class="btn btn-filter {{ 'active' if current_filter == 'In Progress' else '' }}">
+              In Progress
+            </a>
+            <a href="{{ url_for('dashboard', status='Complete') }}"
+               class="btn btn-filter {{ 'active' if current_filter == 'Complete' else '' }}">
+              Complete
+            </a>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        {% if tasks | length == 0 %}
+        <div class="empty-state">
+          <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+          <h3 class="empty-title">No tasks available</h3>
+          <p class="empty-subtitle">
+            {% if current_filter %}
+              No tasks with status <strong>{{ current_filter }}</strong>.
+              <a href="{{ url_for('dashboard') }}">View all tasks</a>
+            {% else %}
+              Create your first task using the form on the left.
+            {% endif %}
+          </p>
+        </div>
+        {% endif %}
+
+        <!-- Task Cards -->
+        <div class="row g-4" id="taskList">
+          {% for task in tasks %}
+          <div class="col-12" id="taskCard-{{ task.id }}">
+            <div class="task-card status-{{ task.status | lower | replace(' ', '-') }}">
+
+              <!-- Card Top: title + status badge + action buttons -->
+              <div class="task-card-top d-flex align-items-start justify-content-between gap-3">
+                <div class="task-meta">
+                  <h3 class="task-title">{{ task.title }}</h3>
+                  <span class="status-badge status-badge-{{ task.status | lower | replace(' ', '-') }}">
+                    {% if task.status == 'Planned' %}<i class="bi bi-calendar3 me-1"></i>
+                    {% elif task.status == 'In Progress' %}<i class="bi bi-arrow-repeat me-1"></i>
+                    {% else %}<i class="bi bi-check2-all me-1"></i>{% endif %}
+                    {{ task.status }}
+                  </span>
+                </div>
+                <!-- Action buttons: Edit + Delete -->
+                <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                  <span class="task-id-badge">#{{ task.id }}</span>
+                  <!-- Edit button triggers modal -->
+                  <button
+                    type="button"
+                    class="btn btn-action btn-edit"
+                    id="editBtn-{{ task.id }}"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editModal-{{ task.id }}"
+                    title="Edit task"
+                    aria-label="Edit task {{ task.id }}"
+                  >
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <!-- Delete form (POST for CSRF safety) -->
+                  <form
+                    action="{{ url_for('delete_task', task_id=task.id) }}"
+                    method="POST"
+                    class="d-inline"
+                    id="deleteForm-{{ task.id }}"
+                    onsubmit="return confirmDelete(event, '{{ task.title | e }}')"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-action btn-delete"
+                      id="deleteBtn-{{ task.id }}"
+                      title="Delete task"
+                      aria-label="Delete task {{ task.id }}"
+                    >
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Description -->
+              {% if task.description %}
+              <p class="task-description">{{ task.description }}</p>
+              {% else %}
+              <p class="task-description task-no-desc">No description provided.</p>
+              {% endif %}
+
+              <!-- Card Footer: date + update form -->
+              <div class="task-card-footer d-flex flex-wrap align-items-center justify-content-between gap-3">
+
+                <!-- Created date -->
+                <span class="task-date">
+                  <i class="bi bi-clock me-1"></i>
+                  {{ task.created_at[:10] }}
+                </span>
+
+                <!-- Update Status Form -->
+                <form
+                  action="{{ url_for('update_task', task_id=task.id) }}"
+                  method="POST"
+                  class="update-form d-flex align-items-center gap-2"
+                  id="updateForm-{{ task.id }}"
+                >
+                  <select
+                    name="status"
+                    class="form-select form-select-sm status-select"
+                    id="statusSelect-{{ task.id }}"
+                    aria-label="Update status for task {{ task.id }}"
+                  >
+                    <option value="Planned"     {{ 'selected' if task.status == 'Planned' }}>📋 Planned</option>
+                    <option value="In Progress" {{ 'selected' if task.status == 'In Progress' }}>🔄 In Progress</option>
+                    <option value="Complete"    {{ 'selected' if task.status == 'Complete' }}>✅ Complete</option>
+                  </select>
+                  <button
+                    type="submit"
+                    class="btn btn-update"
+                    id="updateBtn-{{ task.id }}"
+                  >
+                    <i class="bi bi-arrow-up-circle me-1"></i>Update
+                  </button>
+                </form>
+
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <!-- ---- END TASK CARDS ---- -->
+
+      </div>
+      <!-- ---- END TASK LIST ---- -->
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ===================================================
+     EDIT MODALS (one per task, rendered server-side)
+     =================================================== -->
+{% for task in tasks %}
+<div
+  class="modal fade"
+  id="editModal-{{ task.id }}"
+  tabindex="-1"
+  aria-labelledby="editModalLabel-{{ task.id }}"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content edit-modal-content">
+
+      <div class="modal-header edit-modal-header">
+        <h5 class="modal-title" id="editModalLabel-{{ task.id }}">
+          <i class="bi bi-pencil-square me-2"></i>Edit Task #{{ task.id }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form
+        action="{{ url_for('edit_task', task_id=task.id) }}"
+        method="POST"
+        id="editForm-{{ task.id }}"
+        novalidate
+      >
+        <div class="modal-body">
+
+          <!-- Title -->
+          <div class="mb-3">
+            <label for="editTitle-{{ task.id }}" class="form-label fw-semibold">
+              Task Title <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control custom-input"
+              id="editTitle-{{ task.id }}"
+              name="title"
+              value="{{ task.title | e }}"
+              maxlength="200"
+              required
+            />
+            <div class="invalid-feedback">Title cannot be empty.</div>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label for="editDesc-{{ task.id }}" class="form-label fw-semibold">
+              Description <span class="text-muted fw-normal">(optional)</span>
+            </label>
+            <textarea
+              class="form-control custom-input"
+              id="editDesc-{{ task.id }}"
+              name="description"
+              rows="4"
+              maxlength="2000"
+            >{{ task.description or '' | e }}</textarea>
+          </div>
+
+        </div>
+
+        <div class="modal-footer edit-modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-create">
+            <i class="bi bi-floppy me-1"></i>Save Changes
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endfor %}
+<!-- ===== END EDIT MODALS ===== -->
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+  // ---------------------------------------------------------
+  // Character counters for title and description inputs
+  // ---------------------------------------------------------
+  function initCharCounter(inputId, counterId, max) {
+    const input = document.getElementById(inputId);
+    const counter = document.getElementById(counterId);
+    if (!input || !counter) return;
+    const update = () => {
+      const len = input.value.length;
+      counter.textContent = `${len} / ${max}`;
+      counter.classList.toggle('counter-warn', len >= max * 0.85);
+    };
+    input.addEventListener('input', update);
+    update();
+  }
+
+  // ---------------------------------------------------------
+  // Bootstrap HTML5 form validation (add-task form)
+  // ---------------------------------------------------------
+  function initFormValidation() {
+    const form = document.getElementById('addTaskForm');
+    if (!form) return;
+    form.addEventListener('submit', (e) => {
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    });
+  }
+
+  // ---------------------------------------------------------
+  // Bootstrap HTML5 form validation (edit modals)
+  // ---------------------------------------------------------
+  function initEditModalValidation() {
+    document.querySelectorAll('[id^="editForm-"]').forEach(form => {
+      form.addEventListener('submit', (e) => {
+        if (!form.checkValidity()) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      });
+    });
+  }
+
+  // ---------------------------------------------------------
+  // Delete confirmation — prevents accidental deletions
+  // ---------------------------------------------------------
+  function confirmDelete(event, taskTitle) {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete:\n\n"${taskTitle}"\n\nThis action cannot be undone.`
+    );
+    if (!confirmed) {
+      event.preventDefault();
+      return false;
+    }
+    // Show spinner on delete button for feedback
+    const btn = event.target.querySelector('button[type="submit"]');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    }
+    return true;
+  }
+
+  // ---------------------------------------------------------
+  // Visual feedback when an update-status form is submitted
+  // ---------------------------------------------------------
+  function initUpdateFeedback() {
+    document.querySelectorAll('.update-form').forEach(form => {
+      form.addEventListener('submit', () => {
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving…';
+        }
+      });
+    });
+  }
+
+  // ---------------------------------------------------------
+  // Initialise everything on DOM ready
+  // ---------------------------------------------------------
+  document.addEventListener('DOMContentLoaded', () => {
+    initCharCounter('taskTitle', 'titleCounter', 200);
+    initCharCounter('taskDescription', 'descCounter', 2000);
+    initFormValidation();
+    initEditModalValidation();
+    initUpdateFeedback();
+  });
+</script>
+{% endblock %}

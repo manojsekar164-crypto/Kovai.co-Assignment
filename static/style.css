@@ -1,0 +1,1006 @@
+/*
+ * style.css — TaskFlow Custom Styles
+ * ====================================
+ * Design tokens → global resets → components
+ * Order: variables → base → navbar → hero → stats
+ *        → form card → task list → footer → utilities
+ */
+
+/* ===================================================
+   DESIGN TOKENS
+   =================================================== */
+:root {
+  /* Palette */
+  --clr-bg:           #0d0f1a;
+  --clr-surface:      #13162b;
+  --clr-surface-2:    #1a1f38;
+  --clr-border:       rgba(255, 255, 255, 0.07);
+  --clr-border-hover: rgba(255, 255, 255, 0.15);
+
+  --clr-accent:       #6c63ff;
+  --clr-accent-2:     #a78bfa;
+  --clr-accent-glow:  rgba(108, 99, 255, 0.35);
+
+  --clr-planned:      #3b82f6;
+  --clr-planned-bg:   rgba(59, 130, 246, 0.12);
+  --clr-inprogress:   #f59e0b;
+  --clr-inprogress-bg:rgba(245, 158, 11, 0.12);
+  --clr-complete:     #10b981;
+  --clr-complete-bg:  rgba(16, 185, 129, 0.12);
+  --clr-total:        #6c63ff;
+  --clr-total-bg:     rgba(108, 99, 255, 0.12);
+
+  --clr-text:         #e2e8f0;
+  --clr-text-muted:   #94a3b8;
+  --clr-text-faint:   #475569;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Spacing & radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 28px var(--clr-accent-glow);
+
+  /* Transitions */
+  --transition: 0.22s ease;
+}
+
+
+/* ===================================================
+   GLOBAL RESET & BASE
+   =================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--clr-bg);
+  color: var(--clr-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+main.main-content { flex: 1; }
+
+a { color: var(--clr-accent-2); text-decoration: none; }
+a:hover { color: var(--clr-accent); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--clr-bg); }
+::-webkit-scrollbar-thumb { background: var(--clr-surface-2); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--clr-accent); }
+
+
+/* ===================================================
+   NAVBAR
+   =================================================== */
+#mainNavbar {
+  background: rgba(13, 15, 26, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--clr-border);
+  padding: 0.75rem 0;
+  z-index: 1030;
+}
+
+.brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  color: #fff;
+}
+
+.brand-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+
+.brand-accent { color: var(--clr-accent-2); }
+
+.navbar-nav .nav-link {
+  color: var(--clr-text-muted) !important;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+  color: #fff !important;
+  background: rgba(255,255,255,0.07);
+}
+
+
+/* ===================================================
+   FLASH MESSAGES
+   =================================================== */
+.flash-alert {
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--clr-surface-2);
+  color: var(--clr-text);
+  font-size: 0.9rem;
+}
+
+.flash-alert.alert-success { border-left: 3px solid var(--clr-complete); }
+.flash-alert.alert-danger   { border-left: 3px solid #f87171; }
+.flash-alert.alert-warning  { border-left: 3px solid var(--clr-inprogress); }
+.flash-alert .btn-close { filter: invert(1) brightness(0.7); }
+
+
+/* ===================================================
+   HERO SECTION
+   =================================================== */
+.hero-section {
+  background: linear-gradient(
+    135deg,
+    var(--clr-surface) 0%,
+    #161b38 60%,
+    var(--clr-surface) 100%
+  );
+  border-bottom: 1px solid var(--clr-border);
+  padding: 4rem 0 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative glow blob */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -60px;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, var(--clr-accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clr-accent-2);
+  margin-bottom: 0.75rem;
+}
+
+.hero-title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: var(--clr-text-muted);
+  max-width: 540px;
+  line-height: 1.7;
+}
+
+.btn-hero {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius-md);
+  border: none;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-hero:hover {
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px var(--clr-accent-glow);
+}
+
+
+/* ===================================================
+   STATISTICS SECTION
+   =================================================== */
+.stats-section {
+  padding: 2.5rem 0 0;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.25rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+  cursor: default;
+  height: 100%;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+}
+
+.stat-icon {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.stat-total     .stat-icon { background: var(--clr-total-bg);      color: var(--clr-total);      }
+.stat-planned   .stat-icon { background: var(--clr-planned-bg);     color: var(--clr-planned);    }
+.stat-inprogress.stat-icon { background: var(--clr-inprogress-bg);  color: var(--clr-inprogress); }
+.stat-complete  .stat-icon { background: var(--clr-complete-bg);    color: var(--clr-complete);   }
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 0.2rem;
+}
+
+
+/* ===================================================
+   MAIN CONTENT SECTION
+   =================================================== */
+.content-section {
+  padding: 2.5rem 0 4rem;
+}
+
+
+/* ===================================================
+   FORM CARD (Add Task)
+   =================================================== */
+.form-card {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.75rem;
+  position: sticky;
+  top: 90px;
+  box-shadow: var(--shadow-card);
+}
+
+.form-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--clr-border);
+}
+
+.form-card-icon {
+  font-size: 1.4rem;
+  color: var(--clr-accent-2);
+}
+
+.form-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* Inputs */
+.custom-input {
+  background: var(--clr-surface-2) !important;
+  border: 1px solid var(--clr-border) !important;
+  border-radius: var(--radius-sm) !important;
+  color: var(--clr-text) !important;
+  font-size: 0.9rem !important;
+  transition: border-color var(--transition), box-shadow var(--transition) !important;
+}
+
+.custom-input:focus {
+  border-color: var(--clr-accent) !important;
+  box-shadow: 0 0 0 3px var(--clr-accent-glow) !important;
+  outline: none !important;
+}
+
+.custom-input::placeholder { color: var(--clr-text-faint) !important; }
+
+/* Select arrow colour */
+.custom-input option {
+  background: var(--clr-surface-2);
+  color: var(--clr-text);
+}
+
+.form-label {
+  font-size: 0.85rem;
+  color: var(--clr-text);
+  margin-bottom: 0.4rem;
+}
+
+.char-counter {
+  font-size: 0.72rem;
+  color: var(--clr-text-faint);
+  text-align: right;
+  margin-top: 0.25rem;
+  transition: color var(--transition);
+}
+
+.char-counter.counter-warn { color: var(--clr-inprogress); }
+
+/* Create button */
+.btn-create {
+  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+  box-shadow: 0 4px 16px var(--clr-accent-glow);
+}
+
+.btn-create:hover {
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px var(--clr-accent-glow);
+}
+
+.btn-create:active { transform: scale(0.98); }
+
+
+/* ===================================================
+   TASK LIST HEADER
+   =================================================== */
+.list-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.task-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 99px;
+  padding: 0 7px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+/* Filter buttons */
+.filter-group { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+.btn-filter {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 99px;
+  border: 1px solid var(--clr-border);
+  background: var(--clr-surface);
+  color: var(--clr-text-muted);
+  transition: all var(--transition);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-filter:hover,
+.btn-filter.active {
+  background: var(--clr-accent);
+  border-color: var(--clr-accent);
+  color: #fff;
+  box-shadow: 0 0 12px var(--clr-accent-glow);
+}
+
+
+/* ===================================================
+   EMPTY STATE
+   =================================================== */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: var(--clr-text-faint);
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--clr-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.empty-subtitle {
+  font-size: 0.9rem;
+  color: var(--clr-text-faint);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+
+/* ===================================================
+   TASK CARDS
+   =================================================== */
+.task-card {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Status left-border accent */
+.task-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  transition: background var(--transition);
+}
+
+.task-card.status-planned::before    { background: var(--clr-planned); }
+.task-card.status-in-progress::before{ background: var(--clr-inprogress); }
+.task-card.status-complete::before   { background: var(--clr-complete); }
+
+.task-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card);
+  border-color: var(--clr-border-hover);
+}
+
+.task-card-top { margin-bottom: 0.75rem; }
+
+.task-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.45rem;
+  line-height: 1.3;
+}
+
+.task-id-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--clr-text-faint);
+  background: var(--clr-surface-2);
+  padding: 0.2rem 0.55rem;
+  border-radius: 99px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Status badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: 99px;
+}
+
+.status-badge-planned     { background: var(--clr-planned-bg);     color: var(--clr-planned);    }
+.status-badge-in-progress { background: var(--clr-inprogress-bg);  color: var(--clr-inprogress); }
+.status-badge-complete    { background: var(--clr-complete-bg);     color: var(--clr-complete);   }
+
+/* Description */
+.task-description {
+  font-size: 0.88rem;
+  color: var(--clr-text-muted);
+  line-height: 1.65;
+  margin-bottom: 1rem;
+}
+
+.task-no-desc { color: var(--clr-text-faint); font-style: italic; }
+
+/* Card footer */
+.task-card-footer {
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--clr-border);
+}
+
+.task-date {
+  font-size: 0.78rem;
+  color: var(--clr-text-faint);
+  white-space: nowrap;
+}
+
+/* Status select in card */
+.status-select {
+  background: var(--clr-surface-2) !important;
+  border: 1px solid var(--clr-border) !important;
+  color: var(--clr-text) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 0.82rem !important;
+  min-width: 140px;
+}
+
+.status-select:focus {
+  border-color: var(--clr-accent) !important;
+  box-shadow: 0 0 0 2px var(--clr-accent-glow) !important;
+}
+
+.status-select option {
+  background: var(--clr-surface-2);
+  color: var(--clr-text);
+}
+
+/* Update button */
+.btn-update {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.38rem 0.9rem;
+  background: var(--clr-surface-2);
+  border: 1px solid var(--clr-border);
+  color: var(--clr-text);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.btn-update:hover {
+  background: var(--clr-accent);
+  border-color: var(--clr-accent);
+  color: #fff;
+  box-shadow: 0 0 12px var(--clr-accent-glow);
+}
+
+
+/* ===================================================
+   FOOTER
+   =================================================== */
+.site-footer {
+  background: var(--clr-surface);
+  border-top: 1px solid var(--clr-border);
+  padding: 1.5rem 0;
+  margin-top: auto;
+}
+
+.footer-brand {
+  font-weight: 800;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.footer-tagline {
+  font-size: 0.82rem;
+  color: var(--clr-text-faint);
+}
+
+.footer-copy {
+  color: var(--clr-text-faint);
+  font-size: 0.8rem;
+}
+
+
+/* ===================================================
+   TASK CARD ACTION BUTTONS (Edit / Delete)  [Phase 3]
+   =================================================== */
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  border: 1px solid var(--clr-border);
+  background: var(--clr-surface-2);
+  color: var(--clr-text-muted);
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.btn-action:hover { color: #fff; }
+
+/* Edit — accent on hover */
+.btn-edit:hover {
+  background: var(--clr-accent);
+  border-color: var(--clr-accent);
+  box-shadow: 0 0 10px var(--clr-accent-glow);
+}
+
+/* Delete — red on hover */
+.btn-delete:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);
+}
+
+
+/* ===================================================
+   EDIT MODAL  [Phase 3]
+   =================================================== */
+.edit-modal-content {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  color: var(--clr-text);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+
+.edit-modal-header {
+  border-bottom: 1px solid var(--clr-border);
+  padding: 1.25rem 1.5rem;
+}
+
+.edit-modal-header .modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.modal-body { padding: 1.5rem; }
+
+.edit-modal-footer {
+  border-top: 1px solid var(--clr-border);
+  padding: 1rem 1.5rem;
+  background: transparent;
+}
+
+/* Secondary (Cancel) button in modal */
+.edit-modal-footer .btn-secondary {
+  background: var(--clr-surface-2);
+  border: 1px solid var(--clr-border);
+  color: var(--clr-text-muted);
+  font-size: 0.88rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+}
+
+.edit-modal-footer .btn-secondary:hover {
+  background: var(--clr-border-hover);
+  color: #fff;
+}
+
+/* Modal backdrop */
+.modal-backdrop { background-color: rgba(0, 0, 0, 0.7); }
+
+
+/* ===================================================
+   BOOTSTRAP OVERRIDES
+   =================================================== */
+/* Dismissible close button */
+.btn-close { filter: invert(1) brightness(0.6); }
+.btn-close:hover { filter: invert(1) brightness(1); }
+
+/* Validation feedback colours */
+.invalid-feedback { font-size: 0.78rem; }
+.was-validated .form-control:invalid { border-color: #f87171 !important; }
+.was-validated .form-control:valid   { border-color: var(--clr-complete) !important; }
+
+
+/* ===================================================
+   RESPONSIVE ADJUSTMENTS
+   =================================================== */
+@media (max-width: 991.98px) {
+  .form-card { position: static; }
+  .hero-section { padding: 2.5rem 0 2rem; }
+  .hero-title { font-size: 2rem; }
+}
+
+@media (max-width: 575.98px) {
+  .stat-card { padding: 1rem; gap: 0.75rem; }
+  .stat-number { font-size: 1.5rem; }
+  .task-card-footer { flex-direction: column; align-items: flex-start; }
+  .filter-group { gap: 0.3rem; }
+  .btn-filter { font-size: 0.75rem; padding: 0.28rem 0.65rem; }
+  .btn-action { width: 26px; height: 26px; font-size: 0.75rem; }
+}
+
+
+/* ===================================================
+   AUTH — LOGIN PAGE  [Phase 4]
+   =================================================== */
+
+/* Full-viewport centred container */
+.login-page {
+  min-height: calc(100vh - 62px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative ambient blobs */
+.login-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(90px);
+  opacity: 0.18;
+}
+.login-blob-1 {
+  width: 520px; height: 520px;
+  background: var(--clr-accent);
+  top: -180px; left: -200px;
+  animation: blobDrift 8s ease-in-out infinite alternate;
+}
+.login-blob-2 {
+  width: 400px; height: 400px;
+  background: var(--clr-accent-2);
+  bottom: -120px; right: -160px;
+  animation: blobDrift 10s ease-in-out infinite alternate-reverse;
+}
+.login-blob-3 {
+  width: 260px; height: 260px;
+  background: var(--clr-complete);
+  top: 40%; left: 55%;
+  animation: blobDrift 12s ease-in-out infinite alternate;
+}
+
+@keyframes blobDrift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(30px, 20px) scale(1.08); }
+}
+
+/* Glassmorphism card */
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  background: rgba(19, 22, 43, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 3rem 2.5rem 2.5rem;
+  text-align: center;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  animation: loginCardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes loginCardIn {
+  from { opacity: 0; transform: translateY(28px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* Brand icon inside login card */
+.login-brand-icon {
+  width: 56px !important;
+  height: 56px !important;
+  font-size: 1.6rem !important;
+}
+
+.login-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.6rem;
+}
+
+.login-subtitle {
+  font-size: 0.97rem;
+  color: var(--clr-text-muted);
+  line-height: 1.65;
+  margin-bottom: 2rem;
+}
+
+/* "Continue with" divider */
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  color: var(--clr-text-faint);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--clr-border);
+}
+
+/* Google Sign-In button */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.88rem 1.5rem;
+  background: #ffffff;
+  color: #1f1f1f;
+  font-size: 0.96rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.01em;
+}
+.btn-google:hover {
+  background: #f5f5f5;
+  color: #1f1f1f;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+}
+.btn-google:active { transform: scale(0.98); box-shadow: none; }
+
+.google-logo {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Feature highlight pills */
+.login-features {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+.login-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--clr-text-faint);
+  font-weight: 500;
+}
+.login-feature i { color: var(--clr-accent-2); font-size: 0.8rem; }
+
+/* Footer note */
+.login-note {
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--clr-text-faint);
+  line-height: 1.6;
+}
+
+
+/* ===================================================
+   AUTH — NAVBAR USER DISPLAY  [Phase 4]
+   =================================================== */
+
+/* Subtle left separator before the user block */
+.nav-user-block { border-left: 1px solid var(--clr-border); }
+
+/* Circular profile picture */
+.nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--clr-border-hover);
+  flex-shrink: 0;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.nav-avatar:hover {
+  border-color: var(--clr-accent-2);
+  box-shadow: 0 0 10px var(--clr-accent-glow);
+}
+
+/* Initials fallback badge when no Google picture is available */
+.nav-avatar-initials {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-2));
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Name + email block */
+.nav-user-info { line-height: 1.25; }
+
+.nav-user-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-user-email {
+  font-size: 0.71rem;
+  color: var(--clr-text-faint);
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sign Out button */
+.btn-logout {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn-logout:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #ef4444;
+  color: #ff6b6b;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.2);
+}
+.btn-logout:active { transform: scale(0.97); }
