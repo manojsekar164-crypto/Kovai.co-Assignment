@@ -2,239 +2,418 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+<div class="container-fluid px-lg-4 px-3 py-3">
 
-<!-- ===================================================
-     HERO SECTION
-     =================================================== -->
-<section class="hero-section">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-lg-8">
-        <p class="hero-eyebrow"><i class="bi bi-lightning-charge-fill me-1"></i> Your productivity hub</p>
-        <h1 class="hero-title">Task Dashboard</h1>
-        <p class="hero-subtitle">
-          Create, track, and manage all your tasks in one place.
-          Stay on top of every project — from planning to completion.
-        </p>
-      </div>
-      <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-        <a href="#addTaskCard" class="btn btn-hero">
-          <i class="bi bi-plus-lg me-2"></i>New Task
-        </a>
-      </div>
+  <!-- ===================================================
+       1. DASHBOARD HEADER (Slim 56px Bar)
+       =================================================== -->
+  <div class="dash-header d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <div>
+      <h1 class="dash-title mb-0">Task Dashboard</h1>
+      <p class="dash-subtitle text-secondary mb-0">Manage and track your work efficiently.</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <!-- Button triggers the Create Task Modal -->
+      <button
+        type="button"
+        class="btn btn-primary btn-new-task shadow-sm"
+        id="openCreateTaskModalBtn"
+        data-bs-toggle="modal"
+        data-bs-target="#createTaskModal"
+      >
+        <i class="bi bi-plus-lg me-1"></i>New Task
+      </button>
     </div>
   </div>
-</section>
 
 
-<!-- ===================================================
-     STATISTICS CARDS
-     =================================================== -->
-<section class="stats-section">
-  <div class="container">
-    <div class="row g-4">
+  <!-- ===================================================
+       2. KPI SECTION (Single Compact Row &le; 95px Height)
+       =================================================== -->
+  <section class="kpi-section mb-3">
+    <div class="row g-2 g-md-3">
 
-      <!-- Total -->
-      <div class="col-6 col-lg-3">
-        <div class="stat-card stat-total">
-          <div class="stat-icon"><i class="bi bi-stack"></i></div>
-          <div class="stat-body">
-            <div class="stat-number">{{ stats.total }}</div>
-            <div class="stat-label">Total Tasks</div>
+      <!-- Total Tasks -->
+      <div class="col-6 col-md-3">
+        <a href="{{ url_for('dashboard') }}" class="text-decoration-none">
+          <div class="kpi-card kpi-total">
+            <div class="kpi-icon"><i class="bi bi-stack"></i></div>
+            <div class="kpi-body">
+              <div class="kpi-value">{{ stats.total }}</div>
+              <div class="kpi-label">Total Tasks</div>
+            </div>
           </div>
-        </div>
+        </a>
       </div>
 
       <!-- Planned -->
-      <div class="col-6 col-lg-3">
-        <div class="stat-card stat-planned">
-          <div class="stat-icon"><i class="bi bi-calendar3"></i></div>
-          <div class="stat-body">
-            <div class="stat-number">{{ stats.planned }}</div>
-            <div class="stat-label">Planned</div>
+      <div class="col-6 col-md-3">
+        <a href="{{ url_for('dashboard', status='Planned') }}" class="text-decoration-none">
+          <div class="kpi-card kpi-planned">
+            <div class="kpi-icon"><i class="bi bi-calendar3"></i></div>
+            <div class="kpi-body">
+              <div class="kpi-value">{{ stats.planned }}</div>
+              <div class="kpi-label">Planned</div>
+            </div>
           </div>
-        </div>
+        </a>
       </div>
 
       <!-- In Progress -->
-      <div class="col-6 col-lg-3">
-        <div class="stat-card stat-inprogress">
-          <div class="stat-icon"><i class="bi bi-arrow-repeat"></i></div>
-          <div class="stat-body">
-            <div class="stat-number">{{ stats.in_progress }}</div>
-            <div class="stat-label">In Progress</div>
+      <div class="col-6 col-md-3">
+        <a href="{{ url_for('dashboard', status='In Progress') }}" class="text-decoration-none">
+          <div class="kpi-card kpi-inprogress">
+            <div class="kpi-icon"><i class="bi bi-arrow-repeat"></i></div>
+            <div class="kpi-body">
+              <div class="kpi-value">{{ stats.in_progress }}</div>
+              <div class="kpi-label">In Progress</div>
+            </div>
           </div>
-        </div>
+        </a>
       </div>
 
       <!-- Complete -->
-      <div class="col-6 col-lg-3">
-        <div class="stat-card stat-complete">
-          <div class="stat-icon"><i class="bi bi-check2-all"></i></div>
-          <div class="stat-body">
-            <div class="stat-number">{{ stats.complete }}</div>
-            <div class="stat-label">Complete</div>
+      <div class="col-6 col-md-3">
+        <a href="{{ url_for('dashboard', status='Complete') }}" class="text-decoration-none">
+          <div class="kpi-card kpi-complete">
+            <div class="kpi-icon"><i class="bi bi-check2-all"></i></div>
+            <div class="kpi-body">
+              <div class="kpi-value">{{ stats.complete }}</div>
+              <div class="kpi-label">Complete</div>
+            </div>
           </div>
-        </div>
+        </a>
       </div>
 
     </div>
-  </div>
-</section>
+  </section>
 
 
-<!-- ===================================================
-     MAIN CONTENT: ADD TASK + TASK LIST
-     =================================================== -->
-<section class="content-section">
-  <div class="container">
-    <div class="row g-5">
+  <!-- ===================================================
+       3. MAIN CONTENT: 280px SIDEBAR + WORKSPACE TABLE
+       =================================================== -->
+  <div class="dash-layout">
 
-      <!-- ---- ADD TASK FORM ---- -->
-      <div class="col-lg-4">
-        <div class="form-card" id="addTaskCard">
-          <div class="form-card-header">
-            <span class="form-card-icon"><i class="bi bi-plus-circle-fill"></i></span>
-            <h2 class="form-card-title">Create New Task</h2>
-          </div>
+    <!-- ---- LEFT: 280px FILTER SIDEBAR ---- -->
+    <aside class="dash-sidebar" id="filterSidebar">
 
-          <form
-            id="addTaskForm"
-            action="{{ url_for('add_task') }}"
-            method="POST"
-            novalidate
-          >
-            <!-- Title -->
-            <div class="mb-4">
-              <label for="taskTitle" class="form-label fw-semibold">
-                Task Title <span class="text-danger">*</span>
-              </label>
-              <input
-                type="text"
-                class="form-control custom-input"
-                id="taskTitle"
-                name="title"
-                placeholder="e.g. Design landing page"
-                maxlength="200"
-                value="{{ form_data.get('title', '') | e }}"
-                required
-                autocomplete="off"
-              />
-              <div class="invalid-feedback">Please enter a task title.</div>
-              <div class="char-counter" id="titleCounter">0 / 200</div>
-            </div>
+      <!-- Real-time Search Box -->
+      <div class="sidebar-search mb-3">
+        <div class="search-box position-relative">
+          <i class="bi bi-search search-icon"></i>
+          <input
+            type="text"
+            id="taskSearchInput"
+            class="form-control form-control-sm search-input"
+            placeholder="Search tasks…"
+            value="{{ search_query | e }}"
+            autocomplete="off"
+            aria-label="Search tasks"
+          />
+          <button
+            type="button"
+            id="clearSearchBtn"
+            class="btn-clear-search {{ 'd-none' if not search_query else '' }}"
+            title="Clear search"
+          >&times;</button>
+        </div>
+      </div>
 
-            <!-- Description -->
-            <div class="mb-4">
-              <label for="taskDescription" class="form-label fw-semibold">
-                Description <span class="text-muted fw-normal">(optional)</span>
-              </label>
-              <textarea
-                class="form-control custom-input"
-                id="taskDescription"
-                name="description"
-                rows="4"
-                placeholder="Add more details about this task…"
-                maxlength="2000"
-              >{{ form_data.get('description', '') | e }}</textarea>
-              <div class="char-counter" id="descCounter">0 / 2000</div>
-            </div>
+      <!-- Status Filters -->
+      <div class="sidebar-section mb-3">
+        <div class="sidebar-heading">Status</div>
+        <nav class="sidebar-nav">
+          <a href="{{ url_for('dashboard') }}"
+             class="sidebar-item {{ 'active' if not current_filter else '' }}"
+             data-status="">
+            <span class="d-flex align-items-center"><i class="bi bi-collection me-2"></i>All Tasks</span>
+            <span class="badge rounded-pill bg-light text-dark border">{{ stats.total }}</span>
+          </a>
+          <a href="{{ url_for('dashboard', status='Planned') }}"
+             class="sidebar-item {{ 'active' if current_filter == 'Planned' else '' }}"
+             data-status="Planned">
+            <span class="d-flex align-items-center"><i class="bi bi-calendar3 me-2 text-primary"></i>Planned</span>
+            <span class="badge rounded-pill bg-light text-dark border">{{ stats.planned }}</span>
+          </a>
+          <a href="{{ url_for('dashboard', status='In Progress') }}"
+             class="sidebar-item {{ 'active' if current_filter == 'In Progress' else '' }}"
+             data-status="In Progress">
+            <span class="d-flex align-items-center"><i class="bi bi-arrow-repeat me-2 text-warning"></i>In Progress</span>
+            <span class="badge rounded-pill bg-light text-dark border">{{ stats.in_progress }}</span>
+          </a>
+          <a href="{{ url_for('dashboard', status='Complete') }}"
+             class="sidebar-item {{ 'active' if current_filter == 'Complete' else '' }}"
+             data-status="Complete">
+            <span class="d-flex align-items-center"><i class="bi bi-check2-all me-2 text-success"></i>Complete</span>
+            <span class="badge rounded-pill bg-light text-dark border">{{ stats.complete }}</span>
+          </a>
+        </nav>
+      </div>
 
-            <!-- Status -->
-            <div class="mb-4">
-              <label for="taskStatus" class="form-label fw-semibold">Initial Status</label>
-              <select class="form-select custom-input" id="taskStatus" name="status">
-                <option value="Planned"     {{ 'selected' if form_data.get('status','Planned') == 'Planned' }}>📋 Planned</option>
-                <option value="In Progress" {{ 'selected' if form_data.get('status') == 'In Progress' }}>🔄 In Progress</option>
-                <option value="Complete"    {{ 'selected' if form_data.get('status') == 'Complete' }}>✅ Complete</option>
-              </select>
-            </div>
+      <!-- Priority Filters -->
+      <div class="sidebar-section mb-3">
+        <div class="sidebar-heading">Priority</div>
+        <nav class="sidebar-nav">
+          <a href="{{ url_for('dashboard') }}"
+             class="sidebar-item {{ 'active' if not current_priority else '' }}"
+             data-priority="">
+            <span>All Priorities</span>
+          </a>
+          <a href="{{ url_for('dashboard', priority='High') }}"
+             class="sidebar-item {{ 'active' if current_priority == 'High' else '' }}"
+             data-priority="High">
+            <span class="d-flex align-items-center"><i class="bi bi-fire text-danger me-2"></i>High</span>
+            {% if stats.high_priority > 0 %}
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">{{ stats.high_priority }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('dashboard', priority='Medium') }}"
+             class="sidebar-item {{ 'active' if current_priority == 'Medium' else '' }}"
+             data-priority="Medium">
+            <span class="d-flex align-items-center"><i class="bi bi-circle-fill text-warning me-2 small"></i>Medium</span>
+          </a>
+          <a href="{{ url_for('dashboard', priority='Low') }}"
+             class="sidebar-item {{ 'active' if current_priority == 'Low' else '' }}"
+             data-priority="Low">
+            <span class="d-flex align-items-center"><i class="bi bi-circle-fill text-primary me-2 small"></i>Low</span>
+          </a>
+        </nav>
+      </div>
 
-            <!-- Submit -->
-            <button
-              type="submit"
-              id="createTaskBtn"
-              class="btn btn-create w-100"
+      <!-- Due Date Urgency Filters -->
+      <div class="sidebar-section mb-3">
+        <div class="sidebar-heading">Deadlines</div>
+        <nav class="sidebar-nav">
+          <a href="{{ url_for('dashboard') }}"
+             class="sidebar-item {{ 'active' if not current_due else '' }}"
+             data-due="">
+            <span>All Deadlines</span>
+          </a>
+          <a href="{{ url_for('dashboard', due='overdue') }}"
+             class="sidebar-item {{ 'active' if current_due == 'overdue' else '' }}"
+             data-due="overdue">
+            <span class="d-flex align-items-center"><i class="bi bi-exclamation-octagon text-danger me-2"></i>Overdue</span>
+            {% if stats.overdue > 0 %}
+            <span class="badge bg-danger text-white">{{ stats.overdue }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('dashboard', due='today') }}"
+             class="sidebar-item {{ 'active' if current_due == 'today' else '' }}"
+             data-due="today">
+            <span class="d-flex align-items-center"><i class="bi bi-calendar-event text-warning me-2"></i>Due Today</span>
+            {% if stats.due_today > 0 %}
+            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">{{ stats.due_today }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('dashboard', due='upcoming') }}"
+             class="sidebar-item {{ 'active' if current_due == 'upcoming' else '' }}"
+             data-due="upcoming">
+            <span class="d-flex align-items-center"><i class="bi bi-clock-history me-2 text-secondary"></i>Upcoming</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Mini Productivity Summary Widget -->
+      <div class="sidebar-widget p-2 rounded-2 border bg-white mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="small fw-semibold text-secondary">Completion</span>
+          <span class="small fw-bold text-dark">{{ stats.completion_rate }}%</span>
+        </div>
+        <div class="progress" style="height: 5px;">
+          <div class="progress-bar bg-success" style="width: {{ stats.completion_rate }}%;"></div>
+        </div>
+        <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 0.72rem;">
+          <span>{{ stats.complete }} done</span>
+          <span>{{ stats.total - stats.complete }} remaining</span>
+        </div>
+      </div>
+
+      <!-- Reset Filters Button -->
+      {% if current_filter or current_priority or current_due or search_query or sort_by != 'newest' %}
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-danger btn-sm w-100 mb-2 py-1" id="resetFiltersBtn">
+        <i class="bi bi-x-circle me-1"></i>Reset All Filters
+      </a>
+      {% endif %}
+    </aside>
+
+
+    <!-- ---- RIGHT: TASK WORKSPACE (SaaS TABLE VIEW) ---- -->
+    <main class="dash-workspace flex-grow-1">
+
+      <!-- Table Control Bar -->
+      <div class="workspace-toolbar d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+        <div class="d-flex align-items-center gap-2">
+          <span class="fw-bold text-dark" style="font-size: 0.95rem;">Tasks</span>
+          <span class="badge bg-light text-secondary border px-2 py-1 rounded-pill" id="visibleTaskCounter">
+            {{ tasks | length }}
+          </span>
+        </div>
+
+        <!-- Sort by Selector -->
+        <div class="d-flex align-items-center gap-2">
+          <label for="sortSelect" class="small text-secondary mb-0 d-none d-sm-inline">Sort by:</label>
+          <form id="sortForm" method="GET" action="{{ url_for('dashboard') }}" class="d-inline">
+            <input type="hidden" name="status" value="{{ current_filter }}" />
+            <input type="hidden" name="priority" value="{{ current_priority }}" />
+            <input type="hidden" name="due" value="{{ current_due }}" />
+            <input type="hidden" name="q" value="{{ search_query }}" />
+            <select
+              name="sort"
+              id="sortSelect"
+              class="form-select form-select-sm table-sort-select"
+              onchange="this.form.submit()"
+              aria-label="Sort tasks"
             >
-              <i class="bi bi-plus-lg me-2"></i>Create Task
-            </button>
+              <option value="newest" {{ 'selected' if sort_by == 'newest' }}>Newest</option>
+              <option value="oldest" {{ 'selected' if sort_by == 'oldest' }}>Oldest</option>
+              <option value="priority" {{ 'selected' if sort_by == 'priority' }}>Priority (High &rarr; Low)</option>
+              <option value="due_date" {{ 'selected' if sort_by == 'due_date' }}>Due Date</option>
+              <option value="status" {{ 'selected' if sort_by == 'status' }}>Status</option>
+            </select>
           </form>
         </div>
       </div>
-      <!-- ---- END ADD TASK FORM ---- -->
 
+      <!-- Empty State Card (Centered) -->
+      <div id="emptyStateContainer" class="empty-state-card {{ 'd-none' if tasks | length > 0 else '' }}">
+        <div class="empty-icon-lg mb-2">📋</div>
+        <h4 class="empty-title mb-1" id="emptyTitle">
+          {% if search_query %}
+            No tasks matching "{{ search_query }}"
+          {% elif current_due == 'overdue' %}
+            🎉 No overdue tasks! You're completely up to date.
+          {% elif current_due == 'today' %}
+            No tasks due today.
+          {% elif current_priority %}
+            No {{ current_priority }} priority tasks found.
+          {% elif current_filter %}
+            No tasks with status "{{ current_filter }}".
+          {% else %}
+            No Tasks Yet
+          {% endif %}
+        </h4>
+        <p class="empty-subtitle text-secondary mb-3" id="emptySubtitle">
+          {% if search_query or current_filter or current_priority or current_due %}
+            Try clearing your search or filters to view all tasks.
+          {% else %}
+            No tasks found for your account. Create your first task to get started.
+          {% endif %}
+        </p>
+        <button
+          type="button"
+          class="btn btn-primary btn-sm px-3"
+          id="emptyCreateTaskBtn"
+          data-bs-toggle="modal"
+          data-bs-target="#createTaskModal"
+        >
+          <i class="bi bi-plus-lg me-1"></i>Create Task
+        </button>
+      </div>
 
-      <!-- ---- TASK LIST ---- -->
-      <div class="col-lg-8">
-
-        <!-- List header + filter -->
-        <div class="list-header d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-          <h2 class="list-title mb-0">
-            <i class="bi bi-list-task me-2"></i>All Tasks
-            <span class="task-count-badge">{{ tasks | length }}</span>
-          </h2>
-
-          <!-- Status Filter -->
-          <div class="filter-group">
-            <a href="{{ url_for('dashboard') }}"
-               class="btn btn-filter {{ 'active' if not current_filter else '' }}">
-              All
-            </a>
-            <a href="{{ url_for('dashboard', status='Planned') }}"
-               class="btn btn-filter {{ 'active' if current_filter == 'Planned' else '' }}">
-              Planned
-            </a>
-            <a href="{{ url_for('dashboard', status='In Progress') }}"
-               class="btn btn-filter {{ 'active' if current_filter == 'In Progress' else '' }}">
-              In Progress
-            </a>
-            <a href="{{ url_for('dashboard', status='Complete') }}"
-               class="btn btn-filter {{ 'active' if current_filter == 'Complete' else '' }}">
-              Complete
-            </a>
-          </div>
-        </div>
-
-        <!-- Empty State -->
-        {% if tasks | length == 0 %}
-        <div class="empty-state">
-          <div class="empty-icon"><i class="bi bi-inbox"></i></div>
-          <h3 class="empty-title">No tasks available</h3>
-          <p class="empty-subtitle">
-            {% if current_filter %}
-              No tasks with status <strong>{{ current_filter }}</strong>.
-              <a href="{{ url_for('dashboard') }}">View all tasks</a>
-            {% else %}
-              Create your first task using the form on the left.
-            {% endif %}
-          </p>
-        </div>
-        {% endif %}
-
-        <!-- Task Cards -->
-        <div class="row g-4" id="taskList">
-          {% for task in tasks %}
-          <div class="col-12" id="taskCard-{{ task.id }}">
-            <div class="task-card status-{{ task.status | lower | replace(' ', '-') }}">
-
-              <!-- Card Top: title + status badge + action buttons -->
-              <div class="task-card-top d-flex align-items-start justify-content-between gap-3">
-                <div class="task-meta">
-                  <h3 class="task-title">{{ task.title }}</h3>
-                  <span class="status-badge status-badge-{{ task.status | lower | replace(' ', '-') }}">
-                    {% if task.status == 'Planned' %}<i class="bi bi-calendar3 me-1"></i>
-                    {% elif task.status == 'In Progress' %}<i class="bi bi-arrow-repeat me-1"></i>
-                    {% else %}<i class="bi bi-check2-all me-1"></i>{% endif %}
-                    {{ task.status }}
-                  </span>
+      <!-- Professional SaaS Table View -->
+      <div class="table-responsive task-table-wrap {{ 'd-none' if tasks | length == 0 else '' }}" id="taskTableWrap">
+        <table class="table task-table align-middle mb-0" id="taskTable">
+          <thead>
+            <tr>
+              <th scope="col" style="min-width: 260px;">Title</th>
+              <th scope="col" style="width: 140px;">Status</th>
+              <th scope="col" style="width: 105px;">Priority</th>
+              <th scope="col" style="width: 130px;">Due Date</th>
+              <th scope="col" style="width: 95px;">Created</th>
+              <th scope="col" style="width: 75px;" class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="taskTableBody">
+            {% for task in tasks %}
+            <tr
+              class="task-row status-border-{{ task.status | lower | replace(' ', '-') }}"
+              id="taskRow-{{ task.id }}"
+              data-id="{{ task.id }}"
+              data-title="{{ task.title | lower | e }}"
+              data-desc="{{ (task.description or '') | lower | e }}"
+              data-status="{{ task.status }}"
+              data-priority="{{ task.priority }}"
+              data-due-state="{{ task.due_state }}"
+              data-due="{{ task.due_date or '' }}"
+              data-created="{{ task.created_at }}"
+            >
+              <!-- Title & Subtitle Description -->
+              <td data-label="Title">
+                <div class="task-title-cell">
+                  <span class="task-title-text text-dark fw-semibold">{{ task.title }}</span>
+                  {% if task.description %}
+                  <div class="task-desc-text text-muted text-truncate" style="max-width: 380px;">{{ task.description }}</div>
+                  {% endif %}
                 </div>
-                <!-- Action buttons: Edit + Delete -->
-                <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                  <span class="task-id-badge">#{{ task.id }}</span>
-                  <!-- Edit button triggers modal -->
+              </td>
+
+              <!-- Status with Quick Inline Changer -->
+              <td data-label="Status">
+                <form
+                  action="{{ url_for('update_task', task_id=task.id) }}"
+                  method="POST"
+                  class="d-inline status-form"
+                  id="statusForm-{{ task.id }}"
+                >
+                  <select
+                    name="status"
+                    class="form-select form-select-sm table-status-select status-select-{{ task.status | lower | replace(' ', '-') }}"
+                    id="statusSelect-{{ task.id }}"
+                    onchange="this.form.submit()"
+                    aria-label="Status for task {{ task.id }}"
+                  >
+                    <option value="Planned" {{ 'selected' if task.status == 'Planned' }}>📋 Planned</option>
+                    <option value="In Progress" {{ 'selected' if task.status == 'In Progress' }}>🔄 In Progress</option>
+                    <option value="Complete" {{ 'selected' if task.status == 'Complete' }}>✅ Complete</option>
+                  </select>
+                </form>
+              </td>
+
+              <!-- Priority Badge -->
+              <td data-label="Priority">
+                <span class="badge-priority badge-priority-{{ task.priority | lower }}">
+                  {% if task.priority == 'High' %}<i class="bi bi-fire me-1"></i>
+                  {% elif task.priority == 'Medium' %}<i class="bi bi-circle-half me-1"></i>
+                  {% else %}<i class="bi bi-circle me-1"></i>{% endif %}
+                  {{ task.priority }}
+                </span>
+              </td>
+
+              <!-- Due Date Indicator -->
+              <td data-label="Due Date">
+                {% if task.due_state == 'overdue' %}
+                <span class="badge-due badge-due-overdue" title="Overdue">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ task.due_date }}
+                </span>
+                {% elif task.due_state == 'today' %}
+                <span class="badge-due badge-due-today" title="Due today">
+                  <i class="bi bi-calendar-event-fill me-1"></i>Today
+                </span>
+                {% elif task.due_state == 'upcoming' %}
+                <span class="badge-due badge-due-upcoming" title="Upcoming">
+                  <i class="bi bi-calendar3 me-1"></i>{{ task.due_date }}
+                </span>
+                {% elif task.due_state == 'completed' %}
+                <span class="badge-due badge-due-completed">
+                  <i class="bi bi-check-circle me-1"></i>Done
+                </span>
+                {% else %}
+                <span class="text-muted small">—</span>
+                {% endif %}
+              </td>
+
+              <!-- Created Date -->
+              <td data-label="Created">
+                <span class="small text-secondary">{{ task.created_at[:10] }}</span>
+              </td>
+
+              <!-- Actions: Edit & Delete -->
+              <td data-label="Actions" class="text-end">
+                <div class="btn-group btn-group-sm">
+                  <!-- Edit triggers modal -->
                   <button
                     type="button"
-                    class="btn btn-action btn-edit"
+                    class="btn btn-action-tbl btn-edit-tbl"
                     id="editBtn-{{ task.id }}"
                     data-bs-toggle="modal"
                     data-bs-target="#editModal-{{ task.id }}"
@@ -243,17 +422,18 @@
                   >
                     <i class="bi bi-pencil"></i>
                   </button>
-                  <!-- Delete form (POST for CSRF safety) -->
+                  <!-- Delete Form -->
                   <form
                     action="{{ url_for('delete_task', task_id=task.id) }}"
                     method="POST"
-                    class="d-inline"
+                    class="d-inline delete-task-form"
                     id="deleteForm-{{ task.id }}"
-                    onsubmit="return confirmDelete(event, '{{ task.title | e }}')"
+                    data-task-title="{{ task.title | e }}"
+                    onsubmit="return confirmDelete(event)"
                   >
                     <button
                       type="submit"
-                      class="btn btn-action btn-delete"
+                      class="btn btn-action-tbl btn-delete-tbl"
                       id="deleteBtn-{{ task.id }}"
                       title="Delete task"
                       aria-label="Delete task {{ task.id }}"
@@ -262,67 +442,134 @@
                     </button>
                   </form>
                 </div>
-              </div>
-
-              <!-- Description -->
-              {% if task.description %}
-              <p class="task-description">{{ task.description }}</p>
-              {% else %}
-              <p class="task-description task-no-desc">No description provided.</p>
-              {% endif %}
-
-              <!-- Card Footer: date + update form -->
-              <div class="task-card-footer d-flex flex-wrap align-items-center justify-content-between gap-3">
-
-                <!-- Created date -->
-                <span class="task-date">
-                  <i class="bi bi-clock me-1"></i>
-                  {{ task.created_at[:10] }}
-                </span>
-
-                <!-- Update Status Form -->
-                <form
-                  action="{{ url_for('update_task', task_id=task.id) }}"
-                  method="POST"
-                  class="update-form d-flex align-items-center gap-2"
-                  id="updateForm-{{ task.id }}"
-                >
-                  <select
-                    name="status"
-                    class="form-select form-select-sm status-select"
-                    id="statusSelect-{{ task.id }}"
-                    aria-label="Update status for task {{ task.id }}"
-                  >
-                    <option value="Planned"     {{ 'selected' if task.status == 'Planned' }}>📋 Planned</option>
-                    <option value="In Progress" {{ 'selected' if task.status == 'In Progress' }}>🔄 In Progress</option>
-                    <option value="Complete"    {{ 'selected' if task.status == 'Complete' }}>✅ Complete</option>
-                  </select>
-                  <button
-                    type="submit"
-                    class="btn btn-update"
-                    id="updateBtn-{{ task.id }}"
-                  >
-                    <i class="bi bi-arrow-up-circle me-1"></i>Update
-                  </button>
-                </form>
-
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-        <!-- ---- END TASK CARDS ---- -->
-
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-      <!-- ---- END TASK LIST ---- -->
 
-    </div>
+    </main>
   </div>
-</section>
+
+</div>
 
 
 <!-- ===================================================
-     EDIT MODALS (one per task, rendered server-side)
+     CREATE TASK BOOTSTRAP MODAL (Replaces Static Form)
+     =================================================== -->
+<div
+  class="modal fade"
+  id="createTaskModal"
+  tabindex="-1"
+  aria-labelledby="createTaskModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+
+      <div class="modal-header py-3 px-4 border-bottom">
+        <h5 class="modal-title fw-bold" id="createTaskModalLabel">
+          <i class="bi bi-plus-circle-fill text-primary me-2"></i>Create New Task
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form
+        id="addTaskForm"
+        action="{{ url_for('add_task') }}"
+        method="POST"
+        novalidate
+      >
+        <div class="modal-body p-4">
+
+          <!-- Title -->
+          <div class="mb-3">
+            <label for="taskTitle" class="form-label fw-semibold small">
+              Task Title <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control custom-input"
+              id="taskTitle"
+              name="title"
+              placeholder="e.g. Implement user export"
+              maxlength="200"
+              value="{{ form_data.get('title', '') | e }}"
+              required
+              autocomplete="off"
+            />
+            <div class="invalid-feedback">Please enter a task title.</div>
+            <div class="char-counter text-muted" id="titleCounter">0 / 200</div>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label for="taskDescription" class="form-label fw-semibold small">
+              Description <span class="text-muted fw-normal">(optional)</span>
+            </label>
+            <textarea
+              class="form-control custom-input"
+              id="taskDescription"
+              name="description"
+              rows="3"
+              placeholder="Add context, specifications, or notes…"
+              maxlength="2000"
+            >{{ form_data.get('description', '') | e }}</textarea>
+            <div class="char-counter text-muted" id="descCounter">0 / 2000</div>
+          </div>
+
+          <!-- Priority & Status Row -->
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label for="taskPriority" class="form-label fw-semibold small">Priority</label>
+              <select class="form-select custom-input" id="taskPriority" name="priority">
+                <option value="Low" {{ 'selected' if form_data.get('priority') == 'Low' }}>🔵 Low</option>
+                <option value="Medium" {{ 'selected' if form_data.get('priority', 'Medium') == 'Medium' }}>🟡 Medium</option>
+                <option value="High" {{ 'selected' if form_data.get('priority') == 'High' }}>🔴 High</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label for="taskStatus" class="form-label fw-semibold small">Initial Status</label>
+              <select class="form-select custom-input" id="taskStatus" name="status">
+                <option value="Planned" {{ 'selected' if form_data.get('status','Planned') == 'Planned' }}>📋 Planned</option>
+                <option value="In Progress" {{ 'selected' if form_data.get('status') == 'In Progress' }}>🔄 In Progress</option>
+                <option value="Complete" {{ 'selected' if form_data.get('status') == 'Complete' }}>✅ Complete</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Due Date -->
+          <div class="mb-1">
+            <label for="taskDueDate" class="form-label fw-semibold small">
+              Due Date <span class="text-muted fw-normal">(optional)</span>
+            </label>
+            <input
+              type="date"
+              class="form-control custom-input"
+              id="taskDueDate"
+              name="due_date"
+              value="{{ form_data.get('due_date', '') | e }}"
+            />
+          </div>
+
+        </div>
+
+        <div class="modal-footer py-2 px-4 border-top bg-light">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" id="createTaskBtn" class="btn btn-primary btn-sm px-3">
+            <i class="bi bi-plus-lg me-1"></i>Create Task
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================================================
+     EDIT TASK MODALS (One per task, server-rendered)
      =================================================== -->
 {% for task in tasks %}
 <div
@@ -333,11 +580,11 @@
   aria-hidden="true"
 >
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content edit-modal-content">
+    <div class="modal-content border-0 shadow-lg">
 
-      <div class="modal-header edit-modal-header">
-        <h5 class="modal-title" id="editModalLabel-{{ task.id }}">
-          <i class="bi bi-pencil-square me-2"></i>Edit Task #{{ task.id }}
+      <div class="modal-header py-3 px-4 border-bottom">
+        <h5 class="modal-title fw-bold" id="editModalLabel-{{ task.id }}">
+          <i class="bi bi-pencil-square text-primary me-2"></i>Edit Task #{{ task.id }}
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -348,11 +595,11 @@
         id="editForm-{{ task.id }}"
         novalidate
       >
-        <div class="modal-body">
+        <div class="modal-body p-4">
 
           <!-- Title -->
           <div class="mb-3">
-            <label for="editTitle-{{ task.id }}" class="form-label fw-semibold">
+            <label for="editTitle-{{ task.id }}" class="form-label fw-semibold small">
               Task Title <span class="text-danger">*</span>
             </label>
             <input
@@ -369,25 +616,58 @@
 
           <!-- Description -->
           <div class="mb-3">
-            <label for="editDesc-{{ task.id }}" class="form-label fw-semibold">
+            <label for="editDesc-{{ task.id }}" class="form-label fw-semibold small">
               Description <span class="text-muted fw-normal">(optional)</span>
             </label>
             <textarea
               class="form-control custom-input"
               id="editDesc-{{ task.id }}"
               name="description"
-              rows="4"
+              rows="3"
               maxlength="2000"
             >{{ task.description or '' | e }}</textarea>
           </div>
 
+          <!-- Status & Priority Row -->
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label for="editStatus-{{ task.id }}" class="form-label fw-semibold small">Status</label>
+              <select class="form-select custom-input" id="editStatus-{{ task.id }}" name="status">
+                <option value="Planned" {{ 'selected' if task.status == 'Planned' }}>📋 Planned</option>
+                <option value="In Progress" {{ 'selected' if task.status == 'In Progress' }}>🔄 In Progress</option>
+                <option value="Complete" {{ 'selected' if task.status == 'Complete' }}>✅ Complete</option>
+              </select>
+            </div>
+
+            <div class="col-6">
+              <label for="editPriority-{{ task.id }}" class="form-label fw-semibold small">Priority</label>
+              <select class="form-select custom-input" id="editPriority-{{ task.id }}" name="priority">
+                <option value="Low" {{ 'selected' if task.priority == 'Low' }}>🔵 Low</option>
+                <option value="Medium" {{ 'selected' if task.priority == 'Medium' }}>🟡 Medium</option>
+                <option value="High" {{ 'selected' if task.priority == 'High' }}>🔴 High</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Due Date -->
+          <div class="mb-1">
+            <label for="editDueDate-{{ task.id }}" class="form-label fw-semibold small">
+              Due Date <span class="text-muted fw-normal">(optional)</span>
+            </label>
+            <input
+              type="date"
+              class="form-control custom-input"
+              id="editDueDate-{{ task.id }}"
+              name="due_date"
+              value="{{ task.due_date or '' }}"
+            />
+          </div>
+
         </div>
 
-        <div class="modal-footer edit-modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-create">
+        <div class="modal-footer py-2 px-4 border-top bg-light">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm px-3">
             <i class="bi bi-floppy me-1"></i>Save Changes
           </button>
         </div>
@@ -404,9 +684,155 @@
 
 {% block extra_scripts %}
 <script>
-  // ---------------------------------------------------------
-  // Character counters for title and description inputs
-  // ---------------------------------------------------------
+  // =========================================================
+  // 1. Real-Time Table Filter & Search Engine
+  // =========================================================
+  function initTableRealtimeFilters() {
+    const searchInput = document.getElementById('taskSearchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const tableWrap = document.getElementById('taskTableWrap');
+    const tableBody = document.getElementById('taskTableBody');
+    const visibleCounter = document.getElementById('visibleTaskCounter');
+    const emptyState = document.getElementById('emptyStateContainer');
+    const emptyTitle = document.getElementById('emptyTitle');
+    const emptySubtitle = document.getElementById('emptySubtitle');
+
+    if (!tableBody) return;
+
+    const rows = Array.from(tableBody.querySelectorAll('.task-row'));
+
+    function applyFilters() {
+      const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
+      if (clearSearchBtn) {
+        clearSearchBtn.classList.toggle('d-none', !q);
+      }
+
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const title = row.getAttribute('data-title') || '';
+        const desc = row.getAttribute('data-desc') || '';
+        const matches = !q || title.includes(q) || desc.includes(q);
+
+        row.style.display = matches ? '' : 'none';
+        if (matches) visibleCount++;
+      });
+
+      if (visibleCounter) {
+        visibleCounter.textContent = visibleCount;
+      }
+
+      if (emptyState && tableWrap) {
+        if (visibleCount === 0) {
+          emptyState.classList.remove('d-none');
+          tableWrap.classList.add('d-none');
+          if (q) {
+            emptyTitle.textContent = `No tasks matching "${q}"`;
+            emptySubtitle.textContent = 'Try checking for typos or clear your search term.';
+          } else {
+            emptyTitle.textContent = 'No Tasks Yet';
+            emptySubtitle.textContent = 'No tasks found for your account. Create your first task to get started.';
+          }
+        } else {
+          emptyState.classList.add('d-none');
+          tableWrap.classList.remove('d-none');
+        }
+      }
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFilters);
+    }
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        applyFilters();
+        searchInput.focus();
+      });
+    }
+
+    // Auto-open create modal if previous submission had validation errors
+    {% if form_data and form_data.get('title') %}
+    const createModalEl = document.getElementById('createTaskModal');
+    if (createModalEl && window.bootstrap && bootstrap.Modal) {
+      const modal = bootstrap.Modal.getOrCreateInstance(createModalEl);
+      modal.show();
+    }
+    {% endif %}
+  }
+
+  // =========================================================
+  // 2. Robust Modal Trigger Engine (Click & Touch Friendly)
+  // =========================================================
+  function initModalTriggers() {
+    const modalEl = document.getElementById('createTaskModal');
+
+    const openCreateModal = (e) => {
+      if (e) e.preventDefault();
+      if (!modalEl) return;
+      if (window.bootstrap && bootstrap.Modal) {
+        const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        bsModal.show();
+      } else {
+        // Fallback in case bootstrap hasn't attached yet
+        modalEl.classList.add('show');
+        modalEl.style.display = 'block';
+        document.body.classList.add('modal-open');
+        let backdrop = document.querySelector('.modal-backdrop');
+        if (!backdrop) {
+          backdrop = document.createElement('div');
+          backdrop.className = 'modal-backdrop fade show';
+          document.body.appendChild(backdrop);
+        }
+      }
+      setTimeout(() => {
+        const titleInput = document.getElementById('taskTitle');
+        if (titleInput) titleInput.focus();
+      }, 250);
+    };
+
+    // Attach to all elements targeting #createTaskModal
+    document.querySelectorAll('[data-bs-target="#createTaskModal"]').forEach(btn => {
+      btn.addEventListener('click', openCreateModal);
+    });
+
+    // Support edit modal buttons (click & touch)
+    document.querySelectorAll('[data-bs-target^="#editModal-"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const targetId = btn.getAttribute('data-bs-target');
+        const editModalEl = targetId ? document.querySelector(targetId) : null;
+        if (!editModalEl) return;
+        if (window.bootstrap && bootstrap.Modal) {
+          bootstrap.Modal.getOrCreateInstance(editModalEl).show();
+        } else {
+          editModalEl.classList.add('show');
+          editModalEl.style.display = 'block';
+          document.body.classList.add('modal-open');
+        }
+      });
+    });
+
+    // Close buttons fallback across all modals
+    document.querySelectorAll('.modal [data-bs-dismiss="modal"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const parentModal = btn.closest('.modal');
+        if (!parentModal) return;
+        if (window.bootstrap && bootstrap.Modal) {
+          bootstrap.Modal.getOrCreateInstance(parentModal).hide();
+        } else {
+          parentModal.classList.remove('show');
+          parentModal.style.display = 'none';
+          document.body.classList.remove('modal-open');
+          const backdrop = document.querySelector('.modal-backdrop');
+          if (backdrop) backdrop.remove();
+        }
+      });
+    });
+  }
+
+  // =========================================================
+  // 3. Character Counters & Bootstrap Validation
+  // =========================================================
   function initCharCounter(inputId, counterId, max) {
     const input = document.getElementById(inputId);
     const counter = document.getElementById(counterId);
@@ -414,15 +840,12 @@
     const update = () => {
       const len = input.value.length;
       counter.textContent = `${len} / ${max}`;
-      counter.classList.toggle('counter-warn', len >= max * 0.85);
+      counter.classList.toggle('text-warning', len >= max * 0.85);
     };
     input.addEventListener('input', update);
     update();
   }
 
-  // ---------------------------------------------------------
-  // Bootstrap HTML5 form validation (add-task form)
-  // ---------------------------------------------------------
   function initFormValidation() {
     const form = document.getElementById('addTaskForm');
     if (!form) return;
@@ -435,9 +858,6 @@
     });
   }
 
-  // ---------------------------------------------------------
-  // Bootstrap HTML5 form validation (edit modals)
-  // ---------------------------------------------------------
   function initEditModalValidation() {
     document.querySelectorAll('[id^="editForm-"]').forEach(form => {
       form.addEventListener('submit', (e) => {
@@ -450,10 +870,9 @@
     });
   }
 
-  // ---------------------------------------------------------
-  // Delete confirmation — prevents accidental deletions
-  // ---------------------------------------------------------
-  function confirmDelete(event, taskTitle) {
+  function confirmDelete(event) {
+    const form = event.currentTarget || event.target;
+    const taskTitle = (form && form.getAttribute('data-task-title')) || 'this task';
     const confirmed = window.confirm(
       `Are you sure you want to delete:\n\n"${taskTitle}"\n\nThis action cannot be undone.`
     );
@@ -461,8 +880,7 @@
       event.preventDefault();
       return false;
     }
-    // Show spinner on delete button for feedback
-    const btn = event.target.querySelector('button[type="submit"]');
+    const btn = form.querySelector('button[type="submit"]');
     if (btn) {
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
@@ -470,30 +888,13 @@
     return true;
   }
 
-  // ---------------------------------------------------------
-  // Visual feedback when an update-status form is submitted
-  // ---------------------------------------------------------
-  function initUpdateFeedback() {
-    document.querySelectorAll('.update-form').forEach(form => {
-      form.addEventListener('submit', () => {
-        const btn = form.querySelector('button[type="submit"]');
-        if (btn) {
-          btn.disabled = true;
-          btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving…';
-        }
-      });
-    });
-  }
-
-  // ---------------------------------------------------------
-  // Initialise everything on DOM ready
-  // ---------------------------------------------------------
   document.addEventListener('DOMContentLoaded', () => {
+    initTableRealtimeFilters();
+    initModalTriggers();
     initCharCounter('taskTitle', 'titleCounter', 200);
     initCharCounter('taskDescription', 'descCounter', 2000);
     initFormValidation();
     initEditModalValidation();
-    initUpdateFeedback();
   });
 </script>
 {% endblock %}
