@@ -42,6 +42,7 @@ from flask import (
     Flask, jsonify, request, g,
     render_template, redirect, url_for, flash, session,
 )
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.consumer import oauth_authorized, oauth_error as oauth_error_signal
 
@@ -51,6 +52,8 @@ from flask_dance.consumer import oauth_authorized, oauth_error as oauth_error_si
 # ---------------------------------------------------------------------------
 
 app = Flask(__name__)
+# Support reverse proxy headers (X-Forwarded-Proto, X-Forwarded-For) on Render
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 # Secret key required by Flask for session management.
 # Always set via the SECRET_KEY environment variable in production.
